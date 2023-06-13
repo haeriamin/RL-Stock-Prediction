@@ -1,0 +1,30 @@
+# Install followings manually:
+
+# MS Visual Studio and C++ dependencies
+# CUDA 11.6 downloaded from https://developer.nvidia.com/cuda-11-6-0-download-archive
+# $ pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116
+# $ pip install torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric -f https://data.pyg.org/whl/torch-1.13.0+cu116.html
+
+
+# Then install:
+pytorch-lightning
+scikit-learn
+
+yahoo-finance
+pandas
+numpy
+matplotlib
+stockstats
+gym
+stable-baselines
+tensorflow
+tensorboard
+pyfolio
+alpaca
+alpaca-py
+
+transformers
+feedparser
+optuna==3.2.0
+tqdm==4.64.1
+rich==13.4.2
