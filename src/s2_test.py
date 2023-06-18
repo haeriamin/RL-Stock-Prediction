@@ -45,7 +45,7 @@ def main(data_params, env_kwargs, date, load_data):
 
     # Info
     unique_trade_date = test.date.unique()
-    print('Date range:', unique_trade_date[0], unique_trade_date[-1])
+    print('\nDate range:', unique_trade_date[0], unique_trade_date[-1])
 
     # # Baseline (DJI company)
     # baseline_df = get_baseline(
@@ -65,7 +65,7 @@ def main(data_params, env_kwargs, date, load_data):
         cwd = os.path.join(config.TRAINED_MODEL_DIR, 'ppo_model'),
     )
     # print('\n*** df_daily_return_ppo ***\n', df_daily_return_ppo)
-    # print('\n*** df_actions_ppo ***\n', df_actions_ppo)
+    print('\n*** Actions ***\n', df_actions_ppo)
 
     ppo_cumprod = (df_daily_return_ppo.daily_return + 1).cumprod() - 1
     # print('\n*** PPO cum return ***\n', ppo_cumprod)
@@ -91,7 +91,7 @@ def main(data_params, env_kwargs, date, load_data):
 
     # Account value calculation
     account_value = env_kwargs['initial_amount'] + (env_kwargs['initial_amount'] * ppo_cumprod)
-    # print('\n*** Account value ***\n', account_value)
+    print('\n*** Account value ***\n', account_value)
     plt.plot(df_daily_return_ppo.date, account_value)
     plt.xticks(rotation=90)
     plt.savefig(os.path.join(
@@ -110,4 +110,3 @@ if __name__ == '__main__':
     for date in data_params['test_dates']:
         initial = main(data_params, env_params, date, load_data=True)
         env_params['initial_amount'] = initial
-

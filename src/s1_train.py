@@ -54,13 +54,10 @@ def main(load_data, load_model):
 
 
 if __name__ == '__main__':
-    main(load_data=True, load_model=False)
-
-
-
-
-
-
+    main(
+        load_data = True,
+        load_model = False,
+    )
 
 
     # # Define A2C agent

@@ -1,10 +1,9 @@
 # DRL models from Stable Baselines 3
 import numpy as np
-import pandas as pd
 from finrl import config
+from stable_baselines3 import PPO
 from stable_baselines3 import A2C
 from stable_baselines3 import DDPG
-from stable_baselines3 import PPO
 from stable_baselines3 import SAC
 from stable_baselines3 import TD3
 from stable_baselines3.common.callbacks import BaseCallback
@@ -12,8 +11,12 @@ from stable_baselines3.common.noise import NormalActionNoise
 from stable_baselines3.common.noise import OrnsteinUhlenbeckActionNoise
 
 
-MODELS = {"a2c": A2C, "ddpg": DDPG, "td3": TD3, "sac": SAC, "ppo": PPO}
-MODEL_KWARGS = {x: config.__dict__[f"{x.upper()}_PARAMS"] for x in MODELS.keys()}
+MODELS = {
+    "a2c": A2C, "ddpg": DDPG, "td3": TD3, "sac": SAC, "ppo": PPO
+}
+MODEL_KWARGS = {
+    x: config.__dict__[f"{x.upper()}_PARAMS"] for x in MODELS.keys()
+}
 NOISE = {
     "normal": NormalActionNoise,
     "ornstein_uhlenbeck": OrnsteinUhlenbeckActionNoise,
@@ -98,44 +101,12 @@ class Agent:
         for i in range(len(environment.df.index.unique())):
             action, _states = model.predict(test_obs, deterministic=deterministic)
             test_obs, rewards, dones, info = test_env.step(action)
+            
             if i == (len(environment.df.index.unique()) - 2):
                 account_memory = test_env.env_method(method_name="save_asset_memory")
                 actions_memory = test_env.env_method(method_name="save_action_memory")
-            # state_memory = test_env.env_method(method_name="save_state_memory") # add current state to state memory
+            
             if dones[0]:
-                print("Done!")
                 break
 
         return account_memory[0], actions_memory[0]
-
-    # @staticmethod
-    # def DRL_prediction_load_from_file(model_name, environment, cwd, deterministic=True):
-    #     if model_name not in MODELS:
-    #         raise NotImplementedError("NotImplementedError")
-    #     try:
-    #         # load agent
-    #         model = MODELS[model_name].load(cwd)
-    #         print("Successfully load model", cwd)
-    #     except BaseException:
-    #         raise ValueError("Fail to load agent!")
-
-    #     # test on the testing env
-    #     state = environment.reset()
-    #     episode_returns = []  # the cumulative_return / initial_account
-    #     episode_total_assets = [environment.initial_total_asset]
-    #     done = False
-    #     while not done:
-    #         action = model.predict(state, deterministic=deterministic)[0]
-    #         state, reward, done, _ = environment.step(action)
-
-    #         total_asset = (
-    #             environment.amount
-    #             + (environment.price_ary[environment.day] * environment.stocks).sum()
-    #         )
-    #         episode_total_assets.append(total_asset)
-    #         episode_return = total_asset / environment.initial_total_asset
-    #         episode_returns.append(episode_return)
-
-    #     print("episode_return", episode_return)
-    #     print("Test Finished!")
-    #     return episode_total_assets

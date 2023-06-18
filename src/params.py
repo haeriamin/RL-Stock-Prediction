@@ -1,8 +1,12 @@
 def main():
     data_params = dict(
         stocks = [
-            'AAPL', 'MSFT', 'GOOG',
-            'AMZN', 'TSLA', 'NVDA'
+            'AAPL',
+            # 'MSFT',
+            # 'GOOG',
+            # 'AMZN',
+            'TSLA',
+            # 'NVDA',
         ],  # TODO: Add META/FB
         
         tech_indicator_list = [
@@ -23,10 +27,10 @@ def main():
 
     # Environment parameters
     env_params = dict(
-        hmax = 100,  # maximum number of shares to trade
-        initial_amount = 10000,
-        transaction_cost_pct = 10,  # transaction cost percentage per trade
-        reward_scaling = 1e-1,  # scaling factor for reward, good for training
+        initial_amount = 1000,
+        hmax = 100,  # TODO: maximum number of shares to trade
+        transaction_cost_pct = 1,  # TODO: transaction cost percentage per trade
+        reward_scaling = 1e-1,  # TODO: scaling factor for reward, good for training
         # day = # an increment number to control date
 
         state_space = len(data_params['stocks']),  # dimension of input features
@@ -81,16 +85,11 @@ def main():
     
     train_params = dict(
         tb_log_name = 'PPO',
-        total_timesteps = 4e4,
+        total_timesteps = 10e4,
         log_interval = 1,
         reset_num_timesteps = True,
         progress_bar = True,
     )
 
-    # Properties
-    # state_space = 1 + 2 * stock_dimension + len(INDICATORS) * stock_dimension
     print('Stocks:', data_params['stocks'])
-    # print('Stock Dimension:', len(data_params['stocks']))
-    # print('State Space:', len(data_params['stocks']))
-    
     return data_params, env_params, model_params, train_params

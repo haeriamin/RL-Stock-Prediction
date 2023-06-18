@@ -2,18 +2,17 @@ import os
 import warnings
 import pandas as pd
 from finrl import config, config_tickers
-from finrl.meta.preprocessor.yahoodownloader import YahooDownloader
-from finrl.meta.preprocessor.preprocessors import FeatureEngineer, data_split
+
+import downloader
+import preprocessor
 
 
 warnings.filterwarnings("ignore")
 
 
-
-
 def main(stocks, mode, load, date=None):
     if not load:
-        df = YahooDownloader(
+        df = downloader.YahooDownloader(
             start_date = '2017-01-01', #'2008-01-01',
             end_date = '2023-06-01',
             ticker_list = stocks, #config_tickers.DOW_30_TICKER,
@@ -26,7 +25,7 @@ def main(stocks, mode, load, date=None):
         df = pd.read_csv(
             os.path.join('./', config.DATA_SAVE_DIR, 'raw_nsdq7.csv'))
     
-    fe = FeatureEngineer(
+    fe = preprocessor.FeatureEngineer(
         use_technical_indicator = True,
         use_turbulence = False,
         user_defined_feature = False,
@@ -65,8 +64,8 @@ def main(stocks, mode, load, date=None):
     df = df.sort_values(['date', 'tic']).reset_index(drop=True)
 
     if mode == 'train':
-        df = data_split(df, '2017-01-01', '2023-01-01')
+        df = preprocessor.data_split(df, '2017-01-01', '2023-01-01')
     elif mode == 'test':
-        df = data_split(df, date[0], date[1])
+        df = preprocessor.data_split(df, date[0], date[1])
 
     return df

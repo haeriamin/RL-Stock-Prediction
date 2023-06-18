@@ -20,8 +20,8 @@ stable-baselines
 tensorflow
 tensorboard
 pyfolio
-alpaca
-alpaca-py
+# alpaca
+# alpaca-py
 
 transformers
 feedparser
