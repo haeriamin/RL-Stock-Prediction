@@ -12,15 +12,22 @@ warnings.filterwarnings("ignore")
 
 def main(stocks, mode, load, date=None):
     if not load:
-        df = downloader.YahooDownloader(
-            start_date = '2017-01-01', #'2008-01-01',
-            end_date = '2023-06-01',
-            ticker_list = stocks, #config_tickers.DOW_30_TICKER,
-        ).fetch_data()
+        if mode == 'predict':
+            df = downloader.YahooDownloader(
+                start_date = date[0],
+                end_date = date[1],
+                ticker_list = stocks,
+            ).fetch_data()
+        else:
+            df = downloader.YahooDownloader(
+                start_date = '2017-01-01', #'2008-01-01',
+                end_date = '2023-06-01',
+                ticker_list = stocks, #config_tickers.DOW_30_TICKER,
+            ).fetch_data()
 
-        df.to_csv(
-            os.path.join('./', config.DATA_SAVE_DIR, 'raw_nsdq7.csv'),
-            index = False)
+            df.to_csv(
+                os.path.join('./', config.DATA_SAVE_DIR, 'raw_nsdq7.csv'),
+                index = False)
     else:
         df = pd.read_csv(
             os.path.join('./', config.DATA_SAVE_DIR, 'raw_nsdq7.csv'))
@@ -32,6 +39,7 @@ def main(stocks, mode, load, date=None):
     )
 
     df = fe.preprocess_data(df)
+    # print(df.head())
 
     # Add covariance matrix as states
     df = df.sort_values(['date', 'tic'], ignore_index=True)
@@ -41,7 +49,11 @@ def main(stocks, mode, load, date=None):
     return_list = []
 
     # Look back is one year
-    lookback = 252
+    if mode == 'predict':
+        lookback = len(df.index.unique()) - 2
+    else:
+        lookback = 252
+
     for i in range(lookback, len(df.index.unique())):
         data_lookback = df.loc[i - lookback : i, :]
         price_lookback = data_lookback.pivot_table(
@@ -60,12 +72,15 @@ def main(stocks, mode, load, date=None):
             'return_list': return_list,
         }
     )
+
     df = df.merge(df_cov, on='date')
     df = df.sort_values(['date', 'tic']).reset_index(drop=True)
-
+    
     if mode == 'train':
         df = preprocessor.data_split(df, '2017-01-01', '2023-01-01')
     elif mode == 'test':
+        df = preprocessor.data_split(df, date[0], date[1])
+    elif mode == 'predict':
         df = preprocessor.data_split(df, date[0], date[1])
 
     return df

@@ -40,7 +40,6 @@ def main(load_data, load_model):
             env = env_train,
         )
         model_ppo = my_agent.get_model(
-            model_name = 'ppo',
             model_kwargs = model_params,
         )
         trained_ppo = my_agent.train(
@@ -48,7 +47,7 @@ def main(load_data, load_model):
             train_kwargs = train_params 
         )
         trained_ppo.save(
-            os.path.join(config.TRAINED_MODEL_DIR, 'ppo_model'))
+            os.path.join(config.TRAINED_MODEL_DIR, model_params['model_name']))
     else:
         pass
 

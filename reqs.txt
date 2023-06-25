@@ -16,7 +16,7 @@ numpy
 matplotlib
 stockstats
 gym
-stable-baselines
+stable-baselines3==1.8.0
 tensorflow
 tensorboard
 pyfolio
@@ -28,3 +28,5 @@ feedparser
 optuna==3.2.0
 tqdm==4.64.1
 rich==13.4.2
+pandas_market_calendars==1.16.0
+sb3-contrib==1.8.0

@@ -3,9 +3,19 @@ import numpy as np
 import pandas as pd
 from stockstats import StockDataFrame as Sdf
 
-from finrl import config
-
 import downloader
+
+
+INDICATORS = [
+    "macd",
+    "boll_ub",
+    "boll_lb",
+    "rsi_30",
+    "cci_30",
+    "dx_30",
+    "close_30_sma",
+    "close_60_sma",
+]
 
 
 def data_split(df, start, end, target_date_col="date"):
@@ -27,7 +37,7 @@ class FeatureEngineer:
     def __init__(
         self,
         use_technical_indicator=True,
-        tech_indicator_list=config.INDICATORS,
+        tech_indicator_list=INDICATORS,
         use_vix=False,
         use_turbulence=False,
         user_defined_feature=False,

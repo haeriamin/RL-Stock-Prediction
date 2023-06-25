@@ -1,6 +1,5 @@
-# DRL models from Stable Baselines 3
 import numpy as np
-from finrl import config
+from sb3_contrib import RecurrentPPO
 from stable_baselines3 import PPO
 from stable_baselines3 import A2C
 from stable_baselines3 import DDPG
@@ -12,11 +11,9 @@ from stable_baselines3.common.noise import OrnsteinUhlenbeckActionNoise
 
 
 MODELS = {
-    "a2c": A2C, "ddpg": DDPG, "td3": TD3, "sac": SAC, "ppo": PPO
+    "a2c": A2C, "ddpg": DDPG, "td3": TD3, "sac": SAC, "ppo": PPO, "lstmppo": RecurrentPPO,
 }
-MODEL_KWARGS = {
-    x: config.__dict__[f"{x.upper()}_PARAMS"] for x in MODELS.keys()
-}
+
 NOISE = {
     "normal": NormalActionNoise,
     "ornstein_uhlenbeck": OrnsteinUhlenbeckActionNoise,
@@ -24,9 +21,7 @@ NOISE = {
 
 
 class TensorboardCallback(BaseCallback):
-    """
-    Custom callback for plotting additional values in tensorboard.
-    """
+    # Custom callback for plotting additional values in tensorboard.
     def __init__(self, verbose=0):
         super().__init__(verbose)
 
@@ -48,10 +43,10 @@ class Agent:
     -------
         get_model()
             setup DRL algorithms
-        train_model()
+        train()
             train DRL algorithms in a train dataset
             and output the trained model
-        DRL_prediction()
+        predict()
             make a prediction in a test dataset and get results
     """
     def __init__(self, env):
@@ -61,9 +56,6 @@ class Agent:
     def get_model(self, model_name, model_kwargs=None):
         if model_name not in MODELS:
             raise NotImplementedError("NotImplementedError")
-
-        if model_kwargs is None:
-            model_kwargs = MODEL_KWARGS[model_name]
 
         if "action_noise" in model_kwargs:
             n_actions = self.env.action_space.shape[-1]
@@ -100,13 +92,13 @@ class Agent:
 
         for i in range(len(environment.df.index.unique())):
             action, _states = model.predict(test_obs, deterministic=deterministic)
-            test_obs, rewards, dones, info = test_env.step(action)
+            test_obs, rewards, done, info = test_env.step(action)
             
             if i == (len(environment.df.index.unique()) - 2):
                 account_memory = test_env.env_method(method_name="save_asset_memory")
                 actions_memory = test_env.env_method(method_name="save_action_memory")
             
-            if dones[0]:
+            if done[0]:
                 break
 
         return account_memory[0], actions_memory[0]

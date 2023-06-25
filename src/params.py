@@ -17,20 +17,20 @@ def main():
         ],
 
         test_dates = [
-            ['2023-01-02', '2023-02-01'],
-            ['2023-02-02', '2023-03-01'],
-            ['2023-03-02', '2023-04-01'],
-            ['2023-04-02', '2023-05-01'],
-            ['2023-05-02', '2023-06-01'],
+            ['2023-01-01', '2023-02-01'],
+            ['2023-02-01', '2023-03-01'],
+            ['2023-03-01', '2023-04-01'],
+            ['2023-04-01', '2023-05-01'],
+            ['2023-05-01', '2023-06-01'],
         ],
     )
 
     # Environment parameters
     env_params = dict(
         initial_amount = 1000,
-        hmax = 100,  # TODO: maximum number of shares to trade
-        transaction_cost_pct = 1,  # TODO: transaction cost percentage per trade
-        reward_scaling = 1e-1,  # TODO: scaling factor for reward, good for training
+        commission_perc = 2,  # TODO: transaction cost percentage per trade [%]
+        reward_scaling = 1,  # scaling factor for reward, good for training
+        initial_allocation = [1 / len(data_params['stocks'])] * len(data_params['stocks']),
         # day = # an increment number to control date
 
         state_space = len(data_params['stocks']),  # dimension of input features
@@ -42,7 +42,13 @@ def main():
 
     model_params = dict(
         # env =  # Will be passed elsewhere
-        policy = 'MlpPolicy',  # The policy model to use (MlpPolicy, CnnPolicy, MultiInputPolicy)
+
+        # model_name = 'ppo', #'ppo',
+        # policy = 'MlpPolicy', #'MlpPolicy',  # The policy model to use (MlpPolicy, CnnPolicy, MultiInputPolicy)
+
+        model_name = 'lstmppo',
+        policy = 'MlpLstmPolicy',
+
         learning_rate = 3e-4,  # The learning rate, it can be a function of the current progress remaining (from 1 to 0) | Def: 3e-4
         batch_size = 2 ** 12,  # Def: 2 ** 6
         n_epochs = 50,  # Number of epoch when optimizing the surrogate loss | Def: 10
@@ -85,7 +91,7 @@ def main():
     
     train_params = dict(
         tb_log_name = 'PPO',
-        total_timesteps = 10e4,
+        total_timesteps = 80e4,
         log_interval = 1,
         reset_num_timesteps = True,
         progress_bar = True,

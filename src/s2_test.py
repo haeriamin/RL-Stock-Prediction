@@ -28,7 +28,7 @@ mpl.use('TkAgg')
 warnings.filterwarnings("ignore")
 
 
-def main(data_params, env_kwargs, date, load_data):
+def main(data_params, env_kwargs, model_name, date, load_data):
     # Get data
     test = data.main(
         stocks = data_params['stocks'],
@@ -47,7 +47,7 @@ def main(data_params, env_kwargs, date, load_data):
     unique_trade_date = test.date.unique()
     print('\nDate range:', unique_trade_date[0], unique_trade_date[-1])
 
-    # # Baseline (DJI company)
+    # # TODO: Baseline (DJIA)
     # baseline_df = get_baseline(
     #     ticker = '^DJI',
     #     start = '2020-07-01',
@@ -60,15 +60,14 @@ def main(data_params, env_kwargs, date, load_data):
 
     # Predict
     df_daily_return_ppo, df_actions_ppo = agent.Agent.predict(
-        model_name = 'ppo',
+        model_name = model_name,
         environment = test_env,
-        cwd = os.path.join(config.TRAINED_MODEL_DIR, 'ppo_model'),
+        cwd = os.path.join(config.TRAINED_MODEL_DIR, model_name),
+        deterministic = True,
     )
     # print('\n*** df_daily_return_ppo ***\n', df_daily_return_ppo)
     print('\n*** Actions ***\n', df_actions_ppo)
-
     ppo_cumprod = (df_daily_return_ppo.daily_return + 1).cumprod() - 1
-    # print('\n*** PPO cum return ***\n', ppo_cumprod)
 
     # Pyfolio backtest
     strat_ppo = convert_daily_return_to_pyfolio_ts(df_daily_return_ppo)
@@ -99,14 +98,15 @@ def main(data_params, env_kwargs, date, load_data):
         dpi=400
     )
 
-    return account_value.iat[-1]
+    return account_value.iat[-1], df_actions_ppo.iloc[-1, :].values.flatten().tolist()
 
 
 if __name__ == '__main__':
     # Get params
-    data_params, env_params, _, _ = params.main()
+    data_params, env_params, model_params, _ = params.main()
 
     # Run
     for date in data_params['test_dates']:
-        initial = main(data_params, env_params, date, load_data=True)
-        env_params['initial_amount'] = initial
+        initial_amount, initial_allocation = main(data_params, env_params, model_params['model_name'], date, load_data=True)
+        env_params['initial_amount'] = initial_amount
+        env_params['initial_allocation'] = initial_allocation
