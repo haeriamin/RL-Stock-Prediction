@@ -20,7 +20,6 @@ def main():
             'volume',
         ],
 
-
         tech_indicator_list = [
             'macd',
             'boll_ub', 'boll_lb',
@@ -65,7 +64,7 @@ def main():
 
     model_params = dict(
         # env =  # Will be passed elsewhere
-        policy = policy.ActorCriticPolicy  # The policy model (MlpPolicy, CnnPolicy, MultiInputPolicy)
+        policy = policy.ActorCriticPolicy,  # The policy model (MlpPolicy, CnnPolicy, MultiInputPolicy)
 
         learning_rate = linear_schedule(0.001), # The learning rate, it can be a function of the current progress remaining (from 1 to 0) | Def: 3e-4
         batch_size = 2 ** 6,  # Def: 2 ** 6

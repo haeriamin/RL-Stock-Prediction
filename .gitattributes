@@ -3,5 +3,6 @@
 
 # Byte-compiled / optimized / DLL files
 src/__pycache__/
+src/old/
 tensorboard_log/
-*.py[cod]
+*.pyc
