@@ -115,7 +115,7 @@ class StockPortfolioEnv(gym.Env):
 
         # Input data
         self.data = self.df.loc[self.day : self.day + self.history_window - 1, :]
-        self.set_state(self.data)
+        self.set_state(self.data.copy())
 
         self.date_memory = [self.data.date.unique()[-1]]
 
@@ -172,13 +172,14 @@ class StockPortfolioEnv(gym.Env):
                 # print('Sharpe ratio: ', sharpe)
         else:
             allocation = self.softmax_normalization(actions)
+
             self.actions_memory.append(allocation)
             last_day_memory = self.data
 
             # load next state (input date)
             self.day += 1
             self.data = self.df.loc[self.day : self.day + self.history_window - 1, :]
-            self.set_state(self.data)
+            self.set_state(self.data.copy())
 
             # Ratio of portfolio return (in [-1, 1])
             return_ratio = sum(
@@ -209,7 +210,7 @@ class StockPortfolioEnv(gym.Env):
     def reset(self):
         self.day = 0
         self.data = self.df.loc[self.day : self.day + self.history_window - 1, :]
-        self.set_state(self.data)
+        self.set_state(self.data.copy())
 
         self.asset_memory = [self.initial_amount]
         self.actions_memory = [self.initial_allocation]

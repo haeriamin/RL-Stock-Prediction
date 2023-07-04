@@ -1,8 +1,9 @@
 import policy
+from torch import nn
 
 
 def main():
-    model_name = 'ppo' # 'lstmppo'
+    model_name = 'ppo'
     history_window = 5
 
     data_params = dict(
@@ -62,13 +63,25 @@ def main():
             return progress_remaining * initial_value
         return func
 
+    policy_kwargs = dict(
+        net_arch = dict(pi=[64, 64], vf=[64, 64]),
+        activation_fn = nn.LeakyReLU,
+    )
+
     model_params = dict(
         # env =  # Will be passed elsewhere
         policy = policy.ActorCriticPolicy,  # The policy model (MlpPolicy, CnnPolicy, MultiInputPolicy)
-
+        policy_kwargs = policy_kwargs, # Additional arguments to be passed to the policy on creation | Def: None
         learning_rate = linear_schedule(0.001), # The learning rate, it can be a function of the current progress remaining (from 1 to 0) | Def: 3e-4
-        batch_size = 2 ** 6,  # Def: 2 ** 6
-        n_epochs = 10,  # Number of epoch when optimizing the surrogate loss | Def: 10
+
+        # The number of steps to run for each environment per update (in each rollout/episode)
+        # (i.e. rollout buffer size is n_steps * n_envs where n_envs is number of environment copies running in parallel)
+        # NOTE: n_steps * n_envs must be greater than 1 (because of the advantage normalization)
+        # See https://github.com/pytorch/pytorch/issues/29372
+        n_steps = 252,  # Def: 2 ** 11
+        batch_size = 21,  # Def: 2 ** 6 | Should be less than n_steps
+        n_epochs = 5,  # Number of epoch when optimizing the surrogate loss | Def: 10
+
         gamma = 0.99,  # Discount factor | Def: 0.99
         gae_lambda = 0.95,  # Factor for trade-off of bias vs variance for Generalized Advantage Estimator
         clip_range = 0.2,  # Clipping parameter, it can be a function of the current progress remaining (from 1 to 0).
@@ -78,19 +91,6 @@ def main():
         max_grad_norm = 0.5,  # The maximum value for the gradient clipping
         use_sde = False,  # Whether to use generalized State Dependent Exploration (gSDE) instead of action noise exploration (default: False)
         sde_sample_freq = -1,  # Sample a new noise matrix every n steps when using gSDE | Def: -1 (only sample at the beginning of the rollout)
-
-        tensorboard_log = './tensorboard_log/',  # the log location for tensorboard (if None, no logging)
-        policy_kwargs = None,  # Additional arguments to be passed to the policy on creation
-        verbose = 0, # Verbosity level: 0 for no output, 1 for info messages (such as device or wrappers used), 2 for debug messages
-        seed = 42,  # Seed for the pseudo random generators
-        device = 'auto',  # Device (cpu, cuda, ...) on which the code should be run. Setting it to auto, the code will be run on the GPU if possible.
-        _init_setup_model = True,  # Whether or not to build the network at the creation of the instance | Def: True
-
-        # The number of steps to run for each environment per update
-        # (i.e. rollout buffer size is n_steps * n_envs where n_envs is number of environment copies running in parallel)
-        # NOTE: n_steps * n_envs must be greater than 1 (because of the advantage normalization)
-        # See https://github.com/pytorch/pytorch/issues/29372
-        n_steps = 2 ** 11,  # Def: 2 ** 11
 
         # Clipping parameter for the value function,
         # it can be a function of the current progress remaining (from 1 to 0).
@@ -104,11 +104,17 @@ def main():
         # see issue #213 (cf https://github.com/hill-a/stable-baselines/issues/213)
         # By default, there is no limit on the kl div.
         target_kl = 0.015,  # Def: None 
+
+        tensorboard_log = './tensorboard_log/',  # the log location for tensorboard (if None, no logging)
+        verbose = 0, # Verbosity level: 0 for no output, 1 for info messages (such as device or wrappers used), 2 for debug messages
+        seed = 42,  # Seed for the pseudo random generators
+        device = 'auto',  # Device (cpu, cuda, ...) on which the code should be run. Setting it to auto, the code will be run on the GPU if possible.
+        _init_setup_model = True,  # Whether or not to build the network at the creation of the instance | Def: True
     )
     
     train_params = dict(
         tb_log_name = 'ppo',
-        total_timesteps = 2 ** 18,  
+        total_timesteps = 160e3,  
         log_interval = 1,
         reset_num_timesteps = True,
         progress_bar = True,
