@@ -21,7 +21,7 @@ def main(load_data, load_model):
 
         # Get training data
         df = data.main(
-            stocks = data_params['stocks'],
+            data_params = data_params,
             mode = 'train',
             load = load_data,
         )

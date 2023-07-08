@@ -1,4 +1,5 @@
 import os
+import pickle
 import warnings
 import pandas as pd
 # from finrl import config_tickers
@@ -9,17 +10,17 @@ import preprocessor
 
 warnings.filterwarnings('ignore')
 
-DATASETS_DIR = './datasets'
+DATASETS_DIR = './datasets/'
 if not os.path.exists(DATASETS_DIR):
     os.makedirs(DATASETS_DIR)
 
 
-def main(stocks, mode, load, date=None):
+def main(data_params, mode, load, date=None):
     if not load:
         df = downloader.YahooDownloader(
             start_date = '2017-01-01',
             end_date = '2023-06-01',
-            ticker_list = stocks, #config_tickers.DOW_30_TICKER,
+            ticker_list = data_params['stocks'], #config_tickers.DOW_30_TICKER,
         ).fetch_data()
 
         df.to_csv(
@@ -36,7 +37,6 @@ def main(stocks, mode, load, date=None):
     )
 
     df = fe.preprocess_data(df)
-    # print(df.head())
 
     # Add covariance matrix as states
     df = df.sort_values(['date', 'tic'], ignore_index=True)
@@ -73,10 +73,28 @@ def main(stocks, mode, load, date=None):
     df.drop(labels='open', axis=1, inplace=True)
     df.drop(labels='high', axis=1, inplace=True)
     df.drop(labels='low', axis=1, inplace=True)
-    
+    df['close_org'] = df['close'].copy()
+
     if mode == 'train':
         df = preprocessor.data_split(df, '2017-01-01', '2023-01-01')
+
+        # Normalization
+        features_mean = df[data_params['feature_list']].mean()
+        features_std = df[data_params['feature_list']].std()
+        with open(os.path.join(DATASETS_DIR, 'fit_features_means_and_stds.pickle'), 'wb') as f:
+            pickle.dump([features_mean, features_std], f)
+        # df.to_csv(DATASETS_DIR + 'sample.csv', index=False)
+
+        df[data_params['feature_list']] = (df[data_params['feature_list']] - features_mean) / features_std
+
     elif mode == 'test':
         df = preprocessor.data_split(df, date[0], date[1])
+
+        # Normalization
+        with open(os.path.join(
+            DATASETS_DIR, 'fit_features_means_and_stds.pickle'), 'rb') as f:
+            features_mean, features_std = pickle.load(f)
+        
+        df[data_params['feature_list']] = (df[data_params['feature_list']] - features_mean) / features_std
 
     return df

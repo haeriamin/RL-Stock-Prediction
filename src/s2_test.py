@@ -36,7 +36,7 @@ if not os.path.exists(RESULTS_DIR):
 def main(data_params, env_kwargs, model_name, date, load_data):
     # Get data
     test_data = data.main(
-        stocks = data_params['stocks'],
+        data_params = data_params,
         mode = 'test',
         load = load_data,
         date = date,
@@ -106,7 +106,7 @@ def main(data_params, env_kwargs, model_name, date, load_data):
             df_daily_return_ppo.date,
             test_data[
                 (test_data['date'].isin(df_daily_return_ppo.date)) &
-                (test_data['tic'] == stock)]['close']
+                (test_data['tic'] == stock)]['close_org']
         )
         legends.append(f'Close Price [$], {stock}')
     plt.xticks(

@@ -9,23 +9,43 @@ def main():
     data_params = dict(
         stocks = [
             'AAPL',
+            'TSLA',
             # 'MSFT',
             # 'GOOG',
             # 'AMZN',
-            'TSLA',
             # 'NVDA',
         ],  # TODO: Add META/FB
-        
-        features_list = [
-            'close',
-            'volume',
-        ],
 
-        tech_indicator_list = [
-            'macd',
-            'boll_ub', 'boll_lb',
-            'rsi_30', 'cci_30', 'dx_30',
-            'close_30_sma', 'close_60_sma',
+        feature_list = [
+            # 'close', 'volume',
+
+            'change',
+            'rsi',
+            'stochrsi',
+            'rate',
+            'middle',
+            'tp',
+            'boll', 'boll_ub', 'boll_lb',
+            'macd', 'macds', 'macdh',
+            'ppo', 'ppos', 'ppoh',
+            'kdjk', 'kdjd', 'kdjj',
+            'cr-ma1', 'cr-ma2', 'cr-ma3',
+            'cci',
+            'tr',
+            'atr',
+            'um', 'dm',
+            'pdi', 'mdi', 'dx', 'adx', 'adxr',
+            'trix',
+            'tema',
+            'vr',
+            'dma',
+            'vwma',
+            'chop',
+            'log-ret',
+            'mfi',
+            'wt1', 'wt2',
+            'wr',
+            'supertrend', 'supertrend_lb', 'supertrend_ub',
         ],
 
         test_dates = [
@@ -46,15 +66,14 @@ def main():
         initial_amount = 1000,
         commission_perc = 1,  # transaction cost percentage per trade [%]
         reward_scaling = 1,  # scaling factor for reward, good for training
-        initial_allocation = [0.7, 0.3],#[1 / len(data_params['stocks'])] * len(data_params['stocks']),
+        initial_allocation = [0.7, 0.3], #[1 / len(data_params['stocks'])] * len(data_params['stocks']),
         # day = # an increment number to control date
         history_window = history_window,
+        feature_list = data_params['feature_list'],
 
         state_space = len(data_params['stocks']),  # dimension of input features
         stock_dim = len(data_params['stocks']),  # number of unique stocks
         action_space = len(data_params['stocks']),  # equals stock_dim
-        turbulence_threshold = len(data_params['stocks']), # equals stock_dim
-        tech_indicator_list = data_params['tech_indicator_list'],  # list of technical indicator names
     )
 
     def linear_schedule(initial_value):
@@ -78,9 +97,9 @@ def main():
         # (i.e. rollout buffer size is n_steps * n_envs where n_envs is number of environment copies running in parallel)
         # NOTE: n_steps * n_envs must be greater than 1 (because of the advantage normalization)
         # See https://github.com/pytorch/pytorch/issues/29372
-        n_steps = 252,  # Def: 2 ** 11
-        batch_size = 21,  # Def: 2 ** 6 | Should be less than n_steps
-        n_epochs = 5,  # Number of epoch when optimizing the surrogate loss | Def: 10
+        n_steps = 2 ** 11,#252,  # Def: 2 ** 11
+        batch_size = 2 ** 6,#21,  # Def: 2 ** 6 | Should be less than n_steps
+        n_epochs = 10,  # Number of epoch when optimizing the surrogate loss | Def: 10
 
         gamma = 0.99,  # Discount factor | Def: 0.99
         gae_lambda = 0.95,  # Factor for trade-off of bias vs variance for Generalized Advantage Estimator
@@ -114,7 +133,7 @@ def main():
     
     train_params = dict(
         tb_log_name = 'ppo',
-        total_timesteps = 160e3,  
+        total_timesteps = 100e3,  
         log_interval = 1,
         reset_num_timesteps = True,
         progress_bar = True,

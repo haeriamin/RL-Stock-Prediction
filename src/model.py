@@ -31,10 +31,6 @@ class StockPortfolioEnv(gym.Env):
             the dimension of input features
         action_space: int
             equals stock dimension
-        tech_indicator_list: list
-            a list of technical indicator names
-        turbulence_threshold: int
-            equals stock dimension
         day: int
             an increment number to control date
     Methods
@@ -66,9 +62,8 @@ class StockPortfolioEnv(gym.Env):
         commission_perc,
         state_space,
         action_space,
-        tech_indicator_list,
+        feature_list,
         reward_scaling = 1,
-        turbulence_threshold=None,
         lookback=252,
         day=0,
         history_window=10,
@@ -81,13 +76,11 @@ class StockPortfolioEnv(gym.Env):
         self.initial_allocation = initial_allocation
         self.state_space = state_space
         self.action_space = action_space
-        self.tech_indicator_list = tech_indicator_list
         self.commission_perc = commission_perc
         self.reward_scaling = reward_scaling
-        
         self.history_window = history_window
         self.tics = list(self.df['tic'].unique())
-        self.feature_list = ['close', 'volume'] + self.tech_indicator_list
+        self.feature_list = feature_list
 
         # action_space normalization and shape is self.stock_dim
         self.action_space = spaces.Box(
@@ -99,13 +92,12 @@ class StockPortfolioEnv(gym.Env):
             low = -np.inf,
             high = np.inf,
             shape = (
-                (self.state_space + len(self.tech_indicator_list) + 2) * self.history_window + 1,
+                (self.state_space + len(self.feature_list)) * self.history_window + 1,
                 self.state_space,
             ),
         )
 
         self.terminal = False
-        self.turbulence_threshold = turbulence_threshold
         self.portfolio_value = self.initial_amount
 
         # memorize values each step
@@ -122,12 +114,7 @@ class StockPortfolioEnv(gym.Env):
 
     def set_state(self, data):
         # Set input features
-        # Normalization
-        features_mean = data[self.feature_list].mean()
-        features_std = data[self.feature_list].std()
-        data[self.feature_list] = (data[self.feature_list] - features_mean) / features_std
-
-        # + Price + Volume + Indicators
+        # Price + Volume + Indicators
         features = np.zeros(shape=(len(self.feature_list) * self.history_window, len(self.tics)))
         temp = np.zeros(shape=(len(self.feature_list) * self.history_window))
         for i, tic in enumerate(self.tics):
@@ -183,7 +170,7 @@ class StockPortfolioEnv(gym.Env):
 
             # Ratio of portfolio return (in [-1, 1])
             return_ratio = sum(
-                ((self.data['close'].values[-2:] / last_day_memory['close'].values[-2:]) - 1) * allocation)
+                ((self.data['close_org'].values[-2:] / last_day_memory['close_org'].values[-2:]) - 1) * allocation)
 
             # Calculate commission fee
             commission_fee = self.commission_perc / 100 * self.portfolio_value * \

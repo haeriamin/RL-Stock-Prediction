@@ -7,14 +7,42 @@ import downloader
 
 
 INDICATORS = [
-    "macd",
-    "boll_ub",
-    "boll_lb",
-    "rsi_30",
-    "cci_30",
-    "dx_30",
-    "close_30_sma",
-    "close_60_sma",
+    # "macd",
+    # "boll_ub",
+    # "boll_lb",
+    # "rsi_30",
+    # "cci_30",
+    # "dx_30",
+    # "close_30_sma",
+    # "close_60_sma",
+
+    'change',
+    'rsi',
+    'stochrsi',
+    'rate',
+    'middle',
+    'tp',
+    'boll', 'boll_ub', 'boll_lb',
+    'macd', 'macds', 'macdh',
+    'ppo', 'ppos', 'ppoh',
+    'kdjk', 'kdjd', 'kdjj',
+    'cr-ma1', 'cr-ma2', 'cr-ma3',
+    'cci',
+    'tr',
+    'atr',
+    'um', 'dm',
+    'pdi', 'mdi', 'dx', 'adx', 'adxr',
+    'trix',
+    'tema',
+    'vr',
+    'dma',
+    'vwma',
+    'chop',
+    'log-ret',
+    'mfi',
+    'wt1', 'wt2',
+    'wr',
+    'supertrend', 'supertrend_lb', 'supertrend_ub',
 ]
 
 
@@ -143,9 +171,6 @@ class FeatureEngineer:
             )
         df = df.sort_values(by=["date", "tic"])
         return df
-        # df = data.set_index(['date','tic']).sort_index()
-        # df = df.join(df.groupby(level=0, group_keys=False).apply(lambda x, y: Sdf.retype(x)[y], y=self.tech_indicator_list))
-        # return df.reset_index()
 
 
     def add_user_defined_feature(self, data):
@@ -156,10 +181,6 @@ class FeatureEngineer:
         """
         df = data.copy()
         df["daily_return"] = df.close.pct_change(1)
-        # df['return_lag_1']=df.close.pct_change(2)
-        # df['return_lag_2']=df.close.pct_change(3)
-        # df['return_lag_3']=df.close.pct_change(4)
-        # df['return_lag_4']=df.close.pct_change(5)
         return df
 
 
