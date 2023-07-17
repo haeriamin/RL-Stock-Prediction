@@ -88,8 +88,9 @@ def main():
     )
 
     model_params = dict(
-        # env =  # Will be passed elsewhere
-        policy = policy.ActorCriticPolicy,  # The policy model (MlpPolicy, CnnPolicy, MultiInputPolicy)
+        # policy = policy.ActorCriticPolicy,  # The policy model (MlpPolicy, CnnPolicy, MultiInputPolicy)
+        policy = policy.GATActorCriticPolicy,
+
         policy_kwargs = policy_kwargs, # Additional arguments to be passed to the policy on creation | Def: None
         learning_rate = linear_schedule(0.001), # The learning rate, it can be a function of the current progress remaining (from 1 to 0) | Def: 3e-4
 

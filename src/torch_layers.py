@@ -1,11 +1,12 @@
-from typing import Dict, List, Tuple, Type, Union
-
 import gym
 import torch as th
 from torch import nn
 
+from typing import Dict, List, Tuple, Type, Union
 from stable_baselines3.common.preprocessing import get_flattened_obs_dim
 from stable_baselines3.common.utils import get_device
+
+from gnn import CapsGATattentionGRU
 
 
 class BaseFeaturesExtractor(nn.Module):
@@ -163,3 +164,47 @@ class MlpExtractor(nn.Module):
 
     def forward_critic(self, features: th.Tensor) -> th.Tensor:
         return self.value_net(features)
+
+
+class GraphExtractor(nn.Module):
+    def __init__(
+        self,
+        feature_dim: int,
+        time_dim: int = 12,
+        last_layer_dim_pi: int = 64,
+        last_layer_dim_vf: int = 64,
+    ) -> None:
+        super(GraphExtractor, self).__init__()
+
+        # Save output dimensions, used to create the distributions
+        self.latent_dim_pi = last_layer_dim_pi
+        self.latent_dim_vf = last_layer_dim_vf
+
+        # Policy network
+        self.policy_net = nn.Sequential(
+            CapsGATattentionGRU(
+                input_dim = last_layer_dim_pi,
+                time_dim = time_dim,
+                feature_dim = feature_dim,
+            ),
+        )
+        
+        # Value network
+        self.value_net = nn.Sequential(
+            CapsGATattentionGRU(
+                input_dim = last_layer_dim_vf,
+                time_dim = time_dim,
+                feature_dim = feature_dim,
+            ),
+        )
+
+    def forward(self, features: th.Tensor) -> Tuple[th.Tensor, th.Tensor]:
+        return self.policy_net(features), self.value_net(features)
+
+    def forward_actor(self, features: th.Tensor) -> th.Tensor:
+        return self.policy_net(features)
+
+    def forward_critic(self, features: th.Tensor) -> th.Tensor:
+        return self.value_net(features)
+    
+

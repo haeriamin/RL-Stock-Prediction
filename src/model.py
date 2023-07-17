@@ -35,10 +35,6 @@ class StockPortfolioEnv(gym.Env):
             an increment number to control date
     Methods
     -------
-    _sell_stock()
-        perform sell action based on the sign of the action
-    _buy_stock()
-        perform buy action based on the sign of the action
     step()
         at each step the agent will return actions, then
         we will calculate the reward, and return the next observation.
@@ -92,8 +88,9 @@ class StockPortfolioEnv(gym.Env):
             low = -np.inf,
             high = np.inf,
             shape = (
-                (self.state_space + len(self.feature_list)) * self.history_window + 1,
                 self.state_space,
+                self.history_window,
+                len(self.feature_list),
             ),
         )
 
@@ -115,20 +112,22 @@ class StockPortfolioEnv(gym.Env):
     def set_state(self, data):
         # Set input features
         # Price + Volume + Indicators
-        features = np.zeros(shape=(len(self.feature_list) * self.history_window, len(self.tics)))
-        temp = np.zeros(shape=(len(self.feature_list) * self.history_window))
+        features = np.zeros(shape=(
+             self.state_space,
+             self.history_window,
+             len(self.feature_list)
+        ))
+        
         for i, tic in enumerate(self.tics):
-            for j, feature in enumerate(self.feature_list):
-                temp[j*self.history_window : (j+1)*self.history_window] = data[self.data['tic'] == tic][feature].to_numpy()
-            features[:, i] = temp
+            features[i] = data[self.data['tic'] == tic][self.feature_list].to_numpy()
 
-        # + Covariance
-        for i in range(0, len(data['cov_list'].values), 2):
-            covs = data['cov_list'].values[i]
-            features = np.append(features, covs, axis=0)
+        # # + Covariance
+        # for i in range(0, len(data['cov_list'].values), 2):
+        #     covs = data['cov_list'].values[i]
+        #     features = np.append(features, covs, axis=0)
 
-        # + Current allocation
-        features = np.append(features, [self.actions_memory[-1]], axis=0)
+        # # + Current allocation
+        # features = np.append(features, [self.actions_memory[-1]], axis=0)
 
         self.state = features
 

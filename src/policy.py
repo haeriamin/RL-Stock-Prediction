@@ -5,7 +5,7 @@ import copy
 import warnings
 from abc import ABC, abstractmethod
 from functools import partial
-from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar, Union
+from typing import Any, Dict, List, Optional, Tuple, Type, TypeVar, Union, Callable
 
 import numpy as np
 import torch as th
@@ -30,6 +30,7 @@ from torch_layers import (
     FlattenExtractor,
     MlpExtractor,
     create_mlp,
+    GraphExtractor,
 )
 
 
@@ -715,3 +716,37 @@ class ActorCriticPolicy(BasePolicy):
         features = super().extract_features(obs, self.vf_features_extractor)
         latent_vf = self.mlp_extractor.forward_critic(features)
         return self.value_net(latent_vf)
+
+
+#############################################
+class GATActorCriticPolicy(ActorCriticPolicy):
+    def __init__(
+        self,
+        observation_space: spaces.Space,
+        action_space: spaces.Space,
+        lr_schedule: Callable[[float], float],
+        net_arch: Optional[List[Union[int, Dict[str, List[int]]]]] = None,
+        activation_fn: Type[nn.Module] = nn.Tanh,
+        *args,
+        **kwargs,
+    ):
+
+        super(GATActorCriticPolicy, self).__init__(
+            observation_space,
+            action_space,
+            lr_schedule,
+            net_arch,
+            activation_fn,
+            *args,
+            **kwargs,
+        )
+        # Disable orthogonal initialization
+        self.ortho_init = False
+
+    def _build_mlp_extractor(self) -> None:
+        self.mlp_extractor = GraphExtractor(
+            last_layer_dim_pi = self.action_space.shape[0],
+            last_layer_dim_vf = self.action_space.shape[0],
+            time_dim = self.observation_space.shape[1],
+            feature_dim = self.observation_space.shape[2],
+        )
