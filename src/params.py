@@ -89,9 +89,10 @@ def main():
 
     model_params = dict(
         # policy = policy.ActorCriticPolicy,  # The policy model (MlpPolicy, CnnPolicy, MultiInputPolicy)
-        policy = policy.GATActorCriticPolicy,
-
         policy_kwargs = policy_kwargs, # Additional arguments to be passed to the policy on creation | Def: None
+
+        policy = policy.GNNActorCriticPolicy,
+
         learning_rate = linear_schedule(0.001), # The learning rate, it can be a function of the current progress remaining (from 1 to 0) | Def: 3e-4
 
         # The number of steps to run for each environment per update (in each rollout/episode)

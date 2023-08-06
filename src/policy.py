@@ -30,7 +30,7 @@ from torch_layers import (
     FlattenExtractor,
     MlpExtractor,
     create_mlp,
-    GraphExtractor,
+    GNNExtractor,
 )
 
 
@@ -718,8 +718,7 @@ class ActorCriticPolicy(BasePolicy):
         return self.value_net(latent_vf)
 
 
-#############################################
-class GATActorCriticPolicy(ActorCriticPolicy):
+class GNNActorCriticPolicy(ActorCriticPolicy):
     def __init__(
         self,
         observation_space: spaces.Space,
@@ -730,8 +729,7 @@ class GATActorCriticPolicy(ActorCriticPolicy):
         *args,
         **kwargs,
     ):
-
-        super(GATActorCriticPolicy, self).__init__(
+        super(GNNActorCriticPolicy, self).__init__(
             observation_space,
             action_space,
             lr_schedule,
@@ -744,7 +742,7 @@ class GATActorCriticPolicy(ActorCriticPolicy):
         self.ortho_init = False
 
     def _build_mlp_extractor(self) -> None:
-        self.mlp_extractor = GraphExtractor(
+        self.mlp_extractor = GNNExtractor(
             last_layer_dim_pi = self.action_space.shape[0],
             last_layer_dim_vf = self.action_space.shape[0],
             time_dim = self.observation_space.shape[1],

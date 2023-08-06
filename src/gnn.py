@@ -8,9 +8,9 @@ import torch.nn as nn
 import torch_geometric as tg
 
 
-class CapsGATattentionGRU(nn.Module):
+class GNN(nn.Module):
     def __init__(self, input_dim, time_dim, feature_dim):
-        super(CapsGATattentionGRU, self).__init__()
+        super(GNN, self).__init__()
 
         # basic parameters
         self.input_dim = input_dim  # num of nodes 
@@ -71,20 +71,25 @@ class CapsGATattentionGRU(nn.Module):
 
 
     def forward(self, inputs):
+        batch_size = inputs.size()[0]
+
         # # For LSTM
         # inputs = inputs.view(self.input_dim, self.time_dim, self.feature_dim)
 
-        # For GNN: nodes and their attributes
-        print('#######', inputs.size())
-        x = inputs.view(self.input_dim, self.node_attr_dim)
-        # For GNN: edges and their attributes
-        edge_index, edge_attr = self._get_edge_index_and_attr(x)
+        outputs = t.zeros(batch_size, self.input_dim).type_as(inputs)
+        
+        for i in range(batch_size):
+            # For GNN: nodes and their attributes
+            x = inputs[i].view(self.input_dim, self.node_attr_dim)
+            # For GNN: edges and their attributes
+            edge_index, edge_attr = self._get_edge_index_and_attr(x)
 
-        # x = self.node_encoder(x)  # MLP node encoders
-        x = self.processor(x, edge_index, edge_attr)  # GNN node and edge processor
-        # x = self.node_decoder(x)  # MLP node decoder
-        x = self.fusion(x)
-        x = x.view(1, self.input_dim)
+            # x = self.node_encoder(x)  # MLP node encoders
+            x = self.processor(x, edge_index, edge_attr)  # GNN node and edge processor
+            # x = self.node_decoder(x)  # MLP node decoder
+            x = self.fusion(x)
+            x = x.view(1, self.input_dim)
+            outputs[i] = x
 
         return x
     
