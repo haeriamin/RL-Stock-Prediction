@@ -1,5 +1,6 @@
 import policy
 from torch import nn
+# from finrl import config_tickers
 
 
 def main():
@@ -7,34 +8,36 @@ def main():
     history_window = 5
 
     data_params = dict(
-        stocks = [
-            'AAPL',
-            'TSLA',
-            # 'MSFT',
-            # 'GOOG',
-            # 'AMZN',
-            # 'NVDA',
-        ],  # TODO: Add META/FB
+        # stocks = [
+        #     'AAPL',
+        #     'TSLA',
+        #     'MSFT',
+        #     'GOOG',
+        #     'AMZN',
+        #     'NVDA',
+        # ],
+
+        # DOW_7_TICKER
+        stocks = ["AAPL", "MSFT", "UNH", "JNJ", "V", "JPM", "WMT"],
 
         feature_list = [
-            # 'close', 'volume',
-
+            'close', 'volume',
             'change',
             'rsi',
             'stochrsi',
             'rate',
             'middle',
             'tp',
-            'boll', 'boll_ub', 'boll_lb',
-            'macd', 'macds', 'macdh',
-            'ppo', 'ppos', 'ppoh',
-            'kdjk', 'kdjd', 'kdjj',
-            'cr-ma1', 'cr-ma2', 'cr-ma3',
+            'boll', #'boll_ub', 'boll_lb',
+            'macd', #'macds', 'macdh',
+            'ppo', #'ppos', 'ppoh',
+            'kdjk', #'kdjd', 'kdjj',
+            'cr-ma1', #'cr-ma2', 'cr-ma3',
             'cci',
             'tr',
             'atr',
             'um', 'dm',
-            'pdi', 'mdi', 'dx', 'adx', 'adxr',
+            'pdi', #'mdi', 'dx', 'adx', 'adxr',
             'trix',
             'tema',
             'vr',
@@ -43,9 +46,9 @@ def main():
             'chop',
             'log-ret',
             'mfi',
-            'wt1', 'wt2',
+            'wt1', #'wt2',
             'wr',
-            'supertrend', 'supertrend_lb', 'supertrend_ub',
+            'supertrend', #'supertrend_lb', 'supertrend_ub',
         ],
 
         test_dates = [
@@ -66,7 +69,8 @@ def main():
         initial_amount = 1000,
         commission_perc = 1,  # transaction cost percentage per trade [%]
         reward_scaling = 1,  # scaling factor for reward, good for training
-        initial_allocation = [0.7, 0.3], #[1 / len(data_params['stocks'])] * len(data_params['stocks']),
+        initial_allocation = [1 / len(data_params['stocks'])] * len(data_params['stocks']),
+        # initial_allocation = [0.7, 0.3],
         # day = # an increment number to control date
         history_window = history_window,
         feature_list = data_params['feature_list'],
@@ -89,7 +93,7 @@ def main():
 
     model_params = dict(
         # policy = policy.ActorCriticPolicy,  # The policy model (MlpPolicy, CnnPolicy, MultiInputPolicy)
-        policy_kwargs = policy_kwargs, # Additional arguments to be passed to the policy on creation | Def: None
+        # policy_kwargs = policy_kwargs, # Additional arguments to be passed to the policy on creation | Def: None
 
         policy = policy.GNNActorCriticPolicy,
 

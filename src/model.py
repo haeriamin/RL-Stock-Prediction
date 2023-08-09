@@ -111,11 +111,11 @@ class StockPortfolioEnv(gym.Env):
 
     def set_state(self, data):
         # Set input features
-        # Price + Volume + Indicators
+        # (Price + Volume +) Indicators
         features = np.zeros(shape=(
              self.state_space,
              self.history_window,
-             len(self.feature_list)
+             len(self.feature_list),
         ))
         
         for i, tic in enumerate(self.tics):
@@ -169,7 +169,13 @@ class StockPortfolioEnv(gym.Env):
 
             # Ratio of portfolio return (in [-1, 1])
             return_ratio = sum(
-                ((self.data['close_org'].values[-2:] / last_day_memory['close_org'].values[-2:]) - 1) * allocation)
+                (
+                    (
+                        self.data['close_org'].values[-self.stock_dim:] /
+                        last_day_memory['close_org'].values[-self.stock_dim:]
+                    ) - 1
+                ) * allocation
+            )
 
             # Calculate commission fee
             commission_fee = self.commission_perc / 100 * self.portfolio_value * \
