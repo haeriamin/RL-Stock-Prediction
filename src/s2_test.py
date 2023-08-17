@@ -108,13 +108,14 @@ def main(data_params, env_kwargs, model_name, date, load_data):
                 (test_data['date'].isin(df_daily_return_ppo.date)) &
                 (test_data['tic'] == stock)]['close_org']
         )
-        legends.append(f'Close Price [$], {stock}')
+        legends.append(f'{stock}')
     plt.xticks(
         np.arange(0, len(df_daily_return_ppo.date), step=1),
         np.arange(0, len(df_daily_return_ppo.date), step=1),
         rotation=90)
     plt.grid(True, which='both', linestyle='-')
     plt.legend(legends, fontsize=15)
+    plt.ylabel('Close Price [$]')
 
     plt.subplot(3, 1, 2)
     legends = []
@@ -127,13 +128,14 @@ def main(data_params, env_kwargs, model_name, date, load_data):
             df_daily_return_ppo.date,
             df_actions_ppo[stock].reset_index(drop=True)
         )
-        legends.append(f'Allocation, {stock}')
+        legends.append(f'{stock}')
     plt.xticks(
         np.arange(0, len(df_daily_return_ppo.date), step=1),
         np.arange(0, len(df_daily_return_ppo.date), step=1),
         rotation=90)
     plt.grid(True, which='both', linestyle='-')
     plt.legend(legends, fontsize=15)
+    plt.ylabel('Allocation')
 
     plt.subplot(3, 1, 3)
     plt.plot(
@@ -142,9 +144,19 @@ def main(data_params, env_kwargs, model_name, date, load_data):
     )
     plt.xticks(rotation=90)
     plt.grid(True, which='both', linestyle='-')
-    plt.legend(['Asset Value [$]'], fontsize=15)
+    plt.ylabel('Asset Value [$]')
 
     plt.savefig(os.path.join(RESULTS_DIR, 'test_performance.png'), dpi=400)
+
+    # print(df_daily_return_ppo.head())
+    # from finrl.plot import backtest_plot
+    # backtest_plot(
+    #     df_daily_return_ppo, 
+    #     baseline_ticker = '^DJI', 
+    #     baseline_start = data_params['test_dates'][0][0],
+    #     baseline_end = data_params['test_dates'][0][1],
+    #     value_col_name = 'daily_return',
+    # )
 
     return account_value.iat[-1], df_actions_ppo.iloc[-1, :].values.flatten().tolist()
 
